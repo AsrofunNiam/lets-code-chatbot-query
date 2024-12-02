@@ -38,8 +38,7 @@ func (controller *ProductControllerImpl) Create(c *gin.Context) {
 	productResponse := controller.ProductService.Create(request, c)
 	webResponse := web.WebResponse{
 		Success: true,
-		Message: "Product created successfully",
-		Data:    productResponse,
+		Message: productResponse,
 	}
 
 	c.JSON(http.StatusOK, webResponse)

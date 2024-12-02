@@ -2,9 +2,6 @@ package helper
 
 import (
 	"context"
-	"fmt"
-
-	// "os"
 
 	"github.com/google/generative-ai-go/genai"
 	"google.golang.org/api/option"
@@ -24,17 +21,5 @@ func GenerateQuestion(apiKey, prompt string) (*genai.GenerateContentResponse, er
 	if err != nil {
 		PanicIfError(err)
 	}
-
 	return resp, nil
-}
-
-func PrintResponse(resp *genai.GenerateContentResponse) {
-	for _, cand := range resp.Candidates {
-		if cand.Content != nil {
-			for _, part := range cand.Content.Parts {
-				fmt.Println(part)
-			}
-		}
-	}
-	fmt.Println("---")
 }

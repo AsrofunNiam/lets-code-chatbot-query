@@ -8,11 +8,10 @@ import (
 )
 
 func NewRouter(db *gorm.DB, validate *validator.Validate) *gin.Engine {
-
 	router := gin.New()
 	router.UseRawPath = true
 
-	route.ProductRoute(router, db, validate)
+	route.ChatBotRoute(router, db, validate)
 
 	return router
 }

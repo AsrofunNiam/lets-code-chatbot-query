@@ -16,33 +16,25 @@ import (
 	config "github.com/AsrofunNiam/lets-code-chatbot-query/configuration"
 )
 
-type ProductServiceImpl struct {
-	ProductRepository repository.ProductRepository
-	DB                *gorm.DB
-	Validate          *validator.Validate
+type ChatBotServiceImpl struct {
+	SchemaRepository repository.SchemaRepository
+	DB               *gorm.DB
+	Validate         *validator.Validate
 }
 
-func NewProductService(
-	product repository.ProductRepository,
+func NewChatBotService(
+	schemaRepository repository.SchemaRepository,
 	db *gorm.DB,
 	validate *validator.Validate,
-) ProductService {
-	return &ProductServiceImpl{
-		ProductRepository: product,
-		DB:                db,
-		Validate:          validate,
+) ChatBotService {
+	return &ChatBotServiceImpl{
+		SchemaRepository: schemaRepository,
+		DB:               db,
+		Validate:         validate,
 	}
 }
 
-func (service *ProductServiceImpl) FindAll(filters *map[string]string, c *gin.Context) []web.ProductResponse {
-	tx := service.DB.Begin()
-	defer helper.CommitOrRollback(tx)
-
-	products := service.ProductRepository.FindAll(tx, filters)
-	return products.ToProductResponses()
-}
-
-func (service *ProductServiceImpl) Create(request *web.ProductCreateRequest, c *gin.Context) *genai.GenerateContentResponse {
+func (service *ChatBotServiceImpl) Create(request *web.ChatBotCreateRequest, c *gin.Context) *genai.GenerateContentResponse {
 	tx := service.DB.Begin()
 	defer helper.CommitOrRollback(tx)
 
@@ -53,7 +45,7 @@ func (service *ProductServiceImpl) Create(request *web.ProductCreateRequest, c *
 	}
 
 	// Generate query schema database descriptions
-	descriptions := strings.Join(helper.GenerateSchemaDescriptions(tx), "\n")
+	descriptions := strings.Join(service.GenerateSchemaDescriptions(tx), "\n")
 
 	//  Generate prompt first
 	prompt := fmt.Sprintf("Berdasarkan struktur tabel berikut:\n%s\nBuatkan query SQL untuk: %s. Hanya berikan query SQL tanpa penjelasan apapun atau format markdown.", descriptions, request.Description)
@@ -83,6 +75,17 @@ func (service *ProductServiceImpl) Create(request *web.ProductCreateRequest, c *
 	}
 
 	return respDesc
+}
+
+func (service *ChatBotServiceImpl) GenerateSchemaDescriptions(tx *gorm.DB) []string {
+	databaseSchema := service.SchemaRepository.FindAll(tx)
+	var descriptions []string
+	for _, col := range databaseSchema {
+		desc := fmt.Sprintf("Table: %s, Column: %s, Type: %s", col.TableName, col.ColumnName, col.DataType)
+		descriptions = append(descriptions, desc)
+	}
+
+	return descriptions
 }
 
 // Helper function untuk format hasil query menjadi string

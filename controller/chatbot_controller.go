@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type ProductController interface {
-	FindAll(context *gin.Context)
+type ChatBotController interface {
 	Create(context *gin.Context)
 }

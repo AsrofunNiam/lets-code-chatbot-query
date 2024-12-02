@@ -48,7 +48,7 @@ func (service *ChatBotServiceImpl) Create(request *web.ChatBotCreateRequest, c *
 	descriptions := strings.Join(service.GenerateSchemaDescriptions(tx), "\n")
 
 	//  Generate prompt first
-	prompt := fmt.Sprintf("Berdasarkan struktur tabel berikut:\n%s\nBuatkan query SQL untuk: %s. Hanya berikan query SQL tanpa penjelasan apapun atau format markdown.", descriptions, request.Description)
+	prompt := fmt.Sprintf("Based on the following table structure:\n%s\nGenerate an SQL query for: %s. Only provide the SQL query without any explanation or markdown format.", descriptions, request.Description)
 	resp, err := helper.GenerateQuestion(configuration.GeminiAPIKey, prompt)
 	if err != nil {
 		log.Fatalf("Failed to generate content: %v", err)
@@ -66,7 +66,7 @@ func (service *ChatBotServiceImpl) Create(request *web.ChatBotCreateRequest, c *
 
 	// Send prompt second
 	resultString := formatQueryResult(resultValueDb)
-	newPrompt := fmt.Sprintf("Hasil query adalah: %s. Jelaskan hasil ini dengan bahasa manusia.", resultString)
+	newPrompt := fmt.Sprintf("The result of the query is: %s. Explain this result in provide the explanation in Indonesia and human-readable language.", resultString)
 
 	// Generate description second
 	respDesc, err := helper.GenerateQuestion(configuration.GeminiAPIKey, newPrompt)
